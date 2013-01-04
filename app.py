@@ -33,6 +33,9 @@ def sms():
     elif text_content == 'eob':
         mark_end_of_batch(user)
         message = "Batch marked complete and ready for reviews."
+        if not user.email:
+            message += "Please register an email address to receive \
+            reminders, by texting email:you@yourdomain.com"
     elif text_content == 'done':
         mark_batch_reviews_done(user)
         message = "Reviews for this batch marked complete."
@@ -53,9 +56,10 @@ def book():
     user = find_user_from_email_headers(request)
     if user:
         add_new_book(user, request.form['body-plain'].split('\n', 1)[0])
-        message = Message("Your book has been added.",
-                            recipients=[user.email])
-        mail.send(message)
+        if user.email:
+            message = Message("Your book has been added.",
+                                recipients=[user.email])
+            mail.send(message)
         return 'ok'
 
 
@@ -64,12 +68,13 @@ def eob():
     user = find_user_from_email_headers(request)
     if user:
         mark_end_of_batch(user)
-        message_text = "Batch marked complete and ready for reviews. \
-            (You can text DONE to 917-746-3273 or email \
-            bookqueue@app10659070.mailgun.org with subject line \
-            DONE to stop receiving these reminder emails.)"
-        message = Message(message_text, recipients=[user.email])
-        mail.send(message)
+        if user.email:
+            message_text = "Batch marked complete and ready for reviews. \
+                (You can text DONE to 917-746-3273 or email \
+                bookqueue@app10659070.mailgun.org with subject line \
+                DONE to stop receiving these reminder emails.)"
+            message = Message(message_text, recipients=[user.email])
+            mail.send(message)
         return 'ok'
 
 
@@ -78,9 +83,10 @@ def done():
     user = find_user_from_email_headers(request)
     if user:
         mark_batch_reviews_done(user)
-        message = Message("Reviews for this batch marked complete.",
-                            recipients=[user.email])
-        mail.send(message)
+        if user.email:
+            message = Message("Reviews for this batch marked complete.",
+                                recipients=[user.email])
+            mail.send(message)
         return 'ok'
 
 
@@ -100,7 +106,7 @@ def find_or_create_user(from_number):
     if int(query.count()) > 0:
         return query.first()
     else:
-        user = User(from_number, 'none')
+        user = User(from_number, None)
         db.session.add(user)
         db.session.commit()
         return user
@@ -120,7 +126,7 @@ def mark_batch_reviews_done(user):
                                 Book.review_needed == True).all()
     for book in books:
         db.session.delete(book)
-    user.reviews_needed = False
+    user.reviews_needed = None
     db.session.commit()
 
 
@@ -153,7 +159,7 @@ def update_user_email(user, text_content):
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     phonenumber = db.Column(db.String(20), unique=True)
-    email = db.Column(db.String(120), unique=True)
+    email = db.Column(db.String(120), unique=True, nullable=True)
     reviews_needed = db.Column(db.Boolean, nullable=True)
 
     def __init__(self, phonenumber, email):
