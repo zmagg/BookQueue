@@ -52,7 +52,7 @@ def sms():
 def book():
     user = find_user_from_email_headers(request)
     if user:
-        add_new_book(user, request.form['body-plain'])
+        add_new_book(user, request.form['body-plain'].split('\n', 1)[0])
         message = Message("Your book has been added.",
                             recipients=[user.email])
         mail.send(message)
@@ -87,8 +87,8 @@ def done():
 # shared functions for routes
 
 
-def add_new_book(user, content):
-    book = Book(user.id, content)
+def add_new_book(user, book_info):
+    book = Book(user.id, book_info)
     db.session.add(book)
     if ready_for_new_batch_to_review(user):
         mark_end_of_batch(user)
