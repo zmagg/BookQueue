@@ -14,7 +14,8 @@ app.config.update(
     MAIL_SERVER=os.environ.get('MAILGUN_SMTP_SERVER', 'smtp.mailgun.org'),
     MAIL_PORT=os.environ.get('MAILGUN_SMTP_PORT', 587),
     MAIL_USERNAME=os.environ.get('MAILGUN_SMTP_LOGIN', None),
-    MAIL_PASSWORD=os.environ.get('MAILGUN_SMTP_PASSWORD', None)
+    MAIL_PASSWORD=os.environ.get('MAILGUN_SMTP_PASSWORD', None),
+    DEFAULT_MAIL_SENDER="bookqueue@app10659070.mailgun.org"
     )
 db = SQLAlchemy(app)
 mail = Mail(app)
@@ -31,7 +32,7 @@ def sms():
         message = "Your email has been saved."
     elif text_content == 'eob':
         mark_end_of_batch(user)
-        message = "Batch marked complete."
+        message = "Batch marked complete and ready for reviews."
     elif text_content == 'done':
         mark_batch_reviews_done(user)
         message = "Reviews for this batch marked complete."
@@ -52,7 +53,9 @@ def book():
     user = find_user_from_email_headers(request)
     if user:
         add_new_book(user, request.form['body-plain'])
-        # email reply?
+        message = Message("Your book has been added.",
+                            recipients=[user.email])
+        mail.send(message)
 
 
 @app.route("/eob", methods=['GET', 'POST'])
@@ -60,7 +63,12 @@ def eob():
     user = find_user_from_email_headers(request)
     if user:
         mark_end_of_batch(user)
-        # email reply?
+        message_text = "Batch marked complete and ready for reviews. \
+            (You can text DONE to 917-746-3273 or email \
+            bookqueue@app10659070.mailgun.org with subject line \
+            DONE to stop receiving these reminder emails.)"
+        message = Message(message_text, recipients=[user.email])
+        mail.send(message)
 
 
 @app.route("/done", methods=['GET', 'POST'])
@@ -68,7 +76,9 @@ def done():
     user = find_user_from_email_headers(request)
     if user:
         mark_batch_reviews_done(user)
-        # email reply?
+        message = Message("Reviews for this batch marked complete.",
+                            recipients=[user.email])
+        mail.send(message)
 
 
 # shared functions for routes
