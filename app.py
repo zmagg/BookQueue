@@ -131,11 +131,12 @@ def mark_end_of_batch(user):
 
 def ready_for_new_batch_to_review(user):
     db.session.commit()
-    if user.reviews_needed == True:
+    if user.reviews_needed:
         return False
     else:
         book_count = int(Book.query.filter(Book.user_id == user.id).count())
-        return book_count >= (6 + randrange(7))
+        minimum_books_needed_for_eob = 6 + randrange(7)
+        return book_count >= minimum_books_needed_for_eob
 
 
 def update_user_email(user, text_content):
