@@ -56,6 +56,7 @@ def book():
         message = Message("Your book has been added.",
                             recipients=[user.email])
         mail.send(message)
+        return 'ok'
 
 
 @app.route("/eob", methods=['GET', 'POST'])
@@ -69,6 +70,7 @@ def eob():
             DONE to stop receiving these reminder emails.)"
         message = Message(message_text, recipients=[user.email])
         mail.send(message)
+        return 'ok'
 
 
 @app.route("/done", methods=['GET', 'POST'])
@@ -79,6 +81,7 @@ def done():
         message = Message("Reviews for this batch marked complete.",
                             recipients=[user.email])
         mail.send(message)
+        return 'ok'
 
 
 # shared functions for routes
