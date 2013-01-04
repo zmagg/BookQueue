@@ -59,7 +59,7 @@ def is_email(text_content):
 
 
 def mark_end_of_batch(user):
-    books = Book.query.filter(Book.user_id == user.id)
+    books = Book.query.filter(Book.user_id == user.id).all()
     for book in books:
         book.review_needed = True
     user.reviews_needed = True

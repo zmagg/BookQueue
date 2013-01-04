@@ -16,7 +16,7 @@ def send_reminders():
                       sender="dsucher@gmail.com",
                       recipients=[user.email])
         books = Book.query.filter(Book.user_id == user.id,
-                                    Book.review_needed == True)
+                                    Book.review_needed == True).all()
         msg.body = ""
         for book in books:
             msg.body += book.info + "\n"
