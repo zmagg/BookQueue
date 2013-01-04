@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from flaskext.mail import Mail, Message
+from flask.ext.mail import Mail, Message
 from app import app, User, Book
 
 
