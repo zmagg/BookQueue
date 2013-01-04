@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
 import os
-from flask import Flask
 from flaskext.mail import Mail, Message
-from models import User, Book
+from app import app, User, Book
 
-app = Flask(__name__)
+
 mail = Mail(app)
 
 
