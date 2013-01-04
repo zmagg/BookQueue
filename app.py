@@ -20,6 +20,7 @@ def sms():
 
     if is_email(text_content):
         user.email = text_content
+        message = "Your email has been saved."
     elif text_content == 'eob':
         mark_end_of_batch(user)
         message = "Batch marked complete."
@@ -31,7 +32,7 @@ def sms():
         db.session.add(book)
         if ready_for_new_batch_to_review(user):
             mark_end_of_batch(user)
-        message = "Your book was added."
+        message = "Your book has been added."
 
     db.session.commit()
 
