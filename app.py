@@ -167,8 +167,8 @@ class User(db.Model):
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
-    info = db.Column(db.String(240), unique=True)
-    review_needed = db.Column(db.Boolean, default=False)
+    info = db.Column(db.String(240))
+    review_needed = db.Column(db.Boolean)
 
     def __init__(self, user_id, info):
         self.user_id = user_id
