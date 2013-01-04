@@ -27,7 +27,7 @@ def sms():
         mark_end_of_batch(user)
         message = "Batch marked complete."
     elif text_content == 'done':
-        user.reviews_needed = False
+        mark_batch_reviews_done(user)
         message = "Reviews for this batch marked complete."
     else:
         book = Book(user.id, text_content)
@@ -56,6 +56,14 @@ def find_or_create_user(from_number):
 
 def is_email(text_content):
     return '@' in text_content and ' ' not in text_content
+
+
+def mark_batch_reviews_done(user):
+    books = Book.query.filter(Book.user_id == user.id,
+                                Book.review_needed == True).all()
+    for book in books:
+        db.session.delete(user)
+    user.reviews_needed = False
 
 
 def mark_end_of_batch(user):
