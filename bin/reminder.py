@@ -1,25 +1,14 @@
 #!/usr/bin/env python
 
-import os
-from flask.ext.mail import Mail, Message
-from app import app, User, Book
-
-app.config.update(
-    #EMAIL SETTINGS
-    MAIL_SERVER=os.environ.get('MAILGUN_SMTP_SERVER', 'smtp.mailgun.org'),
-    MAIL_PORT=os.environ.get('MAILGUN_SMTP_PORT', 587),
-    MAIL_USERNAME=os.environ.get('MAILGUN_SMTP_LOGIN', None),
-    MAIL_PASSWORD=os.environ.get('MAILGUN_SMTP_PASSWORD', None)
-    )
-
-mail = Mail(app)
+from app import mail, User, Book
+from flask.ext.mail import Message
 
 
 def send_reminders():
     users = User.query.filter(User.reviews_needed == True)
     for user in users:
         msg = Message("Time to review your latest batch of books!",
-                      sender="dsucher@gmail.com",
+                      sender="bookqueue@app10659070.mailgun.org",
                       recipients=[user.email])
         books = Book.query.filter(Book.user_id == user.id,
                                     Book.review_needed == True).all()

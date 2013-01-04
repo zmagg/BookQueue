@@ -2,14 +2,22 @@ import os
 from flask import Flask, request
 import twilio.twiml
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.mail import Mail, Message
 from random import randrange
+import re
+
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config.update(
+    SQLALCHEMY_DATABASE_URI=os.environ['DATABASE_URL'],
+    #EMAIL SETTINGS
+    MAIL_SERVER=os.environ.get('MAILGUN_SMTP_SERVER', 'smtp.mailgun.org'),
+    MAIL_PORT=os.environ.get('MAILGUN_SMTP_PORT', 587),
+    MAIL_USERNAME=os.environ.get('MAILGUN_SMTP_LOGIN', None),
+    MAIL_PASSWORD=os.environ.get('MAILGUN_SMTP_PASSWORD', None)
+    )
 db = SQLAlchemy(app)
-
-
-#routes
+mail = Mail(app)
 
 
 @app.route("/sms", methods=['GET', 'POST'])
@@ -18,9 +26,8 @@ def sms():
     user = find_or_create_user(from_number)
     text_content = request.form['Body'].lower()
 
-    if is_email(text_content):
-        print "saving email"
-        user.email = text_content
+    if re.search("email:", text_content):
+        update_user_email(user, text_content)
         message = "Your email has been saved."
     elif text_content == 'eob':
         mark_end_of_batch(user)
@@ -29,17 +36,50 @@ def sms():
         mark_batch_reviews_done(user)
         message = "Reviews for this batch marked complete."
     else:
-        book = Book(user.id, text_content)
-        db.session.add(book)
-        if ready_for_new_batch_to_review(user):
-            mark_end_of_batch(user)
+        add_new_book(user, text_content)
         message = "Your book has been added."
-
-    db.session.commit()
 
     resp = twilio.twiml.Response()
     resp.sms(message)
     return str(resp)
+
+
+# email routes
+
+
+@app.route("/book", methods=['GET', 'POST'])
+def book():
+    user = find_user_from_email_headers(request)
+    if user:
+        add_new_book(user, request.form['body-plain'])
+        # email reply?
+
+
+@app.route("/eob", methods=['GET', 'POST'])
+def eob():
+    user = find_user_from_email_headers(request)
+    if user:
+        mark_end_of_batch(user)
+        # email reply?
+
+
+@app.route("/done", methods=['GET', 'POST'])
+def done():
+    user = find_user_from_email_headers(request)
+    if user:
+        mark_batch_reviews_done(user)
+        # email reply?
+
+
+# shared functions for routes
+
+
+def add_new_book(user, content):
+    book = Book(user.id, content)
+    db.session.add(book)
+    if ready_for_new_batch_to_review(user):
+        mark_end_of_batch(user)
+    db.session.commit()
 
 
 def find_or_create_user(from_number):
@@ -53,8 +93,13 @@ def find_or_create_user(from_number):
         return user
 
 
-def is_email(text_content):
-    return '@' in text_content and ' ' not in text_content
+def find_user_from_email_headers(request):
+    from_email = request.form['sender'].lower()
+    query = User.query.filter(User.email == from_email)
+    if int(query.count()) > 0:
+        return query.first()
+    else:
+        return None
 
 
 def mark_batch_reviews_done(user):
@@ -63,6 +108,7 @@ def mark_batch_reviews_done(user):
     for book in books:
         db.session.delete(user)
     user.reviews_needed = False
+    db.session.commit()
 
 
 def mark_end_of_batch(user):
@@ -70,6 +116,7 @@ def mark_end_of_batch(user):
     for book in books:
         book.review_needed = True
     user.reviews_needed = True
+    db.session.commit()
 
 
 def ready_for_new_batch_to_review(user):
@@ -78,7 +125,12 @@ def ready_for_new_batch_to_review(user):
         return False
     else:
         book_count = int(Book.query.filter(Book.user_id == user.id).count())
-        return book_count >= (6 + randrange(6))
+        return book_count >= (6 + randrange(7))
+
+
+def update_user_email(user, text_content):
+    user.email = re.search("(?<=email:).+", text_content).group[0]
+    db.session.commit()
 
 
 # models
