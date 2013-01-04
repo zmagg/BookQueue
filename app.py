@@ -12,8 +12,8 @@ db = SQLAlchemy(app)
 #routes
 
 
-@app.route("/", methods=['GET', 'POST'])
-def on_receive_text():
+@app.route("/sms", methods=['GET', 'POST'])
+def sms():
     from_number = request.values.get('From', None)
     user = find_or_create_user(from_number)
     text_content = request.form['Body'].lower()
