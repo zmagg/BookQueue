@@ -119,7 +119,7 @@ def mark_batch_reviews_done(user):
     books = Book.query.filter(Book.user_id == user.id,
                                 Book.review_needed == True).all()
     for book in books:
-        db.session.delete(user)
+        db.session.delete(book)
     user.reviews_needed = False
     db.session.commit()
 
@@ -143,7 +143,7 @@ def ready_for_new_batch_to_review(user):
 
 
 def update_user_email(user, text_content):
-    user.email = re.search("(?<=email:).+", text_content).group[0]
+    user.email = re.search("(?<=email:).+", text_content).group(0)
     db.session.commit()
 
 
