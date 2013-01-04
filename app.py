@@ -7,6 +7,7 @@ from random import randrange
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy(app)
+app.debug = True
 
 
 #routes
@@ -19,6 +20,7 @@ def sms():
     text_content = request.form['Body'].lower()
 
     if is_email(text_content):
+        print "saving email"
         user.email = text_content
         message = "Your email has been saved."
     elif text_content == 'eob':
@@ -42,18 +44,18 @@ def sms():
 
 
 def find_or_create_user(from_number):
-    db_results = User.query.filter(User.phonenumber == from_number)
-    if len(db_results) > 0:
-        return db_results[0]
+    query = User.query.filter(User.phonenumber == from_number)
+    if int(query.count()) > 0:
+        return query.first()
     else:
-        user = User('admin', 'none')
+        user = User(from_number, 'none')
         db.session.add(user)
         db.session.commit()
         return user
 
 
 def is_email(text_content):
-    '@' in text_content and ' ' not in text_content
+    return '@' in text_content and ' ' not in text_content
 
 
 def mark_end_of_batch(user):
@@ -68,7 +70,7 @@ def ready_for_new_batch_to_review(user):
     if user.reviews_needed == True:
         return False
     else:
-        book_count = len(Book.query.filter(Book.user_id == user.id))
+        book_count = int(Book.query.filter(Book.user_id == user.id).count())
         return book_count >= (6 + randrange(6))
 
 
