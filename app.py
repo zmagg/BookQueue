@@ -154,7 +154,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     phonenumber = db.Column(db.String(20), unique=True)
     email = db.Column(db.String(120), unique=True)
-    reviews_needed = db.Column(db.Boolean, default=False)
+    reviews_needed = db.Column(db.Boolean, nullable=True)
 
     def __init__(self, phonenumber, email):
         self.phonenumber = phonenumber
@@ -168,7 +168,7 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     info = db.Column(db.String(240))
-    review_needed = db.Column(db.Boolean)
+    review_needed = db.Column(db.Boolean, nullable=True)
 
     def __init__(self, user_id, info):
         self.user_id = user_id
