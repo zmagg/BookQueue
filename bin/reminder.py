@@ -14,8 +14,9 @@ def send_reminders():
         msg.body = ""
         for book in books:
             msg.body += book.info + "\n"
-        msg.body += "\n(You can text DONE to 917-746-3273 to stop receiving \
-            these reminder emails.)"
+        msg.body += "\n(You can text DONE to 917-746-3273 or email \
+            bookqueue@app10659070.mailgun.org with subject line \
+            DONE to stop receiving these reminder emails."
         mail.send(msg)
 
 
