@@ -10,7 +10,6 @@ import re
 app = Flask(__name__)
 app.config.update(
     SQLALCHEMY_DATABASE_URI=os.environ['DATABASE_URL'],
-    #EMAIL SETTINGS
     MAIL_SERVER=os.environ.get('MAILGUN_SMTP_SERVER', 'smtp.mailgun.org'),
     MAIL_PORT=os.environ.get('MAILGUN_SMTP_PORT', 587),
     MAIL_USERNAME=os.environ.get('MAILGUN_SMTP_LOGIN', None),
