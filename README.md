@@ -14,8 +14,8 @@ To set up the database on Heroku, follow these steps:
 To set up the Heroku mailgun add-on, first add it, then create three routes in the mailgun admin console:
 
     1) filter: match_header("subject", "(?i)EOB"), action: forward("https://yourapp.herokuapp.com/eob")
-    2) filter: match_header("subject", "(?i)DONE"), action forward("https://yourapp.herokuapp.com/done")
-    3) filter: match_header("subject", "(?i)BOOK"), action forward("https://yourapp.herokuapp.com/book")
+    2) filter: match_header("subject", "(?i)DONE"), action: forward("https://yourapp.herokuapp.com/done")
+    3) filter: match_header("subject", "(?i)BOOK"), action: forward("https://yourapp.herokuapp.com/book")
 
 
 Usage for the Current Live Version
@@ -26,25 +26,25 @@ You may want to whitelist bookqueue@app10659070.mailgun.org to avoid reminder em
 
 Register your account with your phone number and email address:
 
-    text 917-746-3273 with EMAIL:you@yourdomain.com to
+    text 917-746-3273 with EMAIL:you@yourdomain.com
 
 
 Add a book to your queue:
 
     email bookqueue@app10659070.mailgun.org with subject: BOOK, body: a single line of book info ('Labyrinths by Jorge Luis Borges')
-    or
+    *or*
     text 917-746-3273 with a single line of book info (ie 'Labyrinths by Jorge Luis Borges')
 
 
 Set all books in your queue as a complete batch ready for reviews:
 
     email bookqueue@app10659070.mailgun.org with subject: EOB
-    or
+    *or*
     text 917-746-3273 with EOB
 
 
 Mark your reviews for your current complete batch done to have that batch deleted and reminders cease:
 
     email bookqueue@app10659070.mailgun.org with subject: DONE
-    or
+    *or*
     text 917-746-3273 with DONE
