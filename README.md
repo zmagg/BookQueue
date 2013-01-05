@@ -31,9 +31,9 @@ Register your account with your phone number and email address:
 
 Add a book to your queue:
 
-    email bookqueue@app10659070.mailgun.org with subject: BOOK, body: a single line of book info ('Labyrinths by Jorge Luis Borges')
+    email bookqueue@app10659070.mailgun.org with subject: BOOK, body: a single line of book info (ie 'Labyrinths by Jorge Luis Borges')
     *or*
-    text 917-746-3273 with a single line of book info (ie 'Labyrinths by Jorge Luis Borges')
+    text 917-746-3273 with a single line of book info (ie 'On the Orator by Cicero')
 
 
 Set all books in your queue as a complete batch ready for reviews:
