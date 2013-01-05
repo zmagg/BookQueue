@@ -1,6 +1,6 @@
-BookQueue is a tool for keeping track of the books you read so you can review them in batches. Once you've accumulated 6 + 1d6 books, or marked a batch as ready, you'll start getting a daily reminder email until you mark that batch done.
+BookQueue is a tool for keeping track of the books you read so you can review them in batches.
 
-You can add new books in the meantime, but they won't be added to your old batch unless you add them yourself.
+You have to initialize your account with a text message, but after that you can add books to your queue via sms or email. Once you've accumulated 6 + 1d6 books, or marked a batch as ready, you'll start getting a daily reminder email until you mark that batch done. You can add new books in the meantime, but they won't be added to your old batch unless you add them yourself.
 
 Books are deleted when you mark their batch done, so you're best off only doing so once you've posted your reviews for that batch on your regular blog or wherever.
 
