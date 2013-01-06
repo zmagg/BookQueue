@@ -38,6 +38,8 @@ def sms():
     elif text_content == 'done':
         mark_batch_reviews_done(user)
         message = "Reviews for this batch marked complete."
+    elif text_content == 'list':
+        message = booklist_message(user)
     else:
         add_new_book(user, text_content)
         message = "Your book has been added."
@@ -59,7 +61,7 @@ def book():
             message = Message("Your book has been added.",
                                 recipients=[user.email])
             mail.send(message)
-        return 'ok'
+    return 'ok'
 
 
 @app.route("/eob", methods=['GET', 'POST'])
@@ -74,7 +76,7 @@ def eob():
                 DONE to stop receiving these reminder emails.)"
             message = Message(message_text, recipients=[user.email])
             mail.send(message)
-        return 'ok'
+    return 'ok'
 
 
 @app.route("/done", methods=['GET', 'POST'])
@@ -86,7 +88,18 @@ def done():
             message = Message("Reviews for this batch marked complete.",
                                 recipients=[user.email])
             mail.send(message)
-        return 'ok'
+    return 'ok'
+
+
+@app.route("/list", methods=['GET', 'POST'])
+def list():
+    user = find_user_from_email_headers(request)
+    if user and user.email:
+        message = Message("Your current books in BookQueue",
+                            recipients=[user.email])
+        message.body = booklist_message(user)
+        mail.send(message)
+    return 'ok'
 
 
 # shared functions for routes
@@ -98,6 +111,23 @@ def add_new_book(user, book_info):
     if ready_for_new_batch_to_review(user):
         mark_end_of_batch(user)
     db.session.commit()
+
+
+def booklist_message(user):
+    batch_books = Book.query.filter(Book.user_id == user.id,
+                                            Book.review_needed == True).all()
+    non_batch_books = Book.query.filter(Book.user_id == user.id,
+                                            Book.review_needed == None).all()
+    msg = ""
+    if len(batch_books) > 0:
+        msg += "Books in your latest complete batch waiting for reviews: \n"
+        for book in batch_books:
+            msg += book.info + " \n"
+        msg += "\n"
+    msg += "Books not yet batched/waiting for reviews: \n"
+    for book in non_batch_books:
+        msg += book.info + " \n"
+    return msg
 
 
 def find_or_create_user(from_number):
