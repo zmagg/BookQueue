@@ -36,6 +36,12 @@ Mark your reviews for your current complete batch done to have that batch delete
     *or*
     text 917-746-3273 with DONE
 
+Get a list of all of your books:
+
+    email bookqueue@app10659070.mailgun.org with subject: LIST
+    *or*
+    text 917-746-3273 with LIST
+
 
 Setting up Your Own Instance of BookQueue
 -----------------------------------------
@@ -58,5 +64,6 @@ To set up the Heroku mailgun add-on, first add it, then create three routes in t
     1) filter: match_header("subject", "(?i)EOB"), action: forward("https://yourapp.herokuapp.com/eob")
     2) filter: match_header("subject", "(?i)DONE"), action: forward("https://yourapp.herokuapp.com/done")
     3) filter: match_header("subject", "(?i)BOOK"), action: forward("https://yourapp.herokuapp.com/book")
+    4) filter: match_header("subject", "(?i)LIST"), action: forward("https://yourapp.herokuapp.com/list")
 
 
