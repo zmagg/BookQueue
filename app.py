@@ -41,7 +41,7 @@ def sms():
     elif text_content == 'list':
         message = booklist_message(user)
     else:
-        add_new_book(user, text_content)
+        add_new_book(user, request.form['Body'])
         message = "Your book has been added."
 
     resp = twilio.twiml.Response()
