@@ -5,48 +5,10 @@ You have to initialize your account with a text message, but after that you can 
 Books are deleted when you mark their batch done, so you're best off only doing so once you've posted your reviews for that batch on your regular blog or wherever.
 
 
-Usage for the Current Live Version
-----------------------------------
-
-You may want to whitelist bookqueue@app10659070.mailgun.org to avoid reminder emails getting stuck in your spam filter.
-
-
-Register your account with your phone number and email address:
-
-    text 917-746-3273 with EMAIL:you@yourdomain.com
-
-
-Add a book to your queue:
-
-    email bookqueue@app10659070.mailgun.org with subject: BOOK, body: a single line of book info (ie 'Labyrinths by Jorge Luis Borges')
-    *or*
-    text 917-746-3273 with a single line of book info (ie 'On the Orator by Cicero')
-
-
-Set all books in your queue as a complete batch ready for reviews:
-
-    email bookqueue@app10659070.mailgun.org with subject: EOB
-    *or*
-    text 917-746-3273 with EOB
-
-
-Mark your reviews for your current complete batch done to have that batch deleted and reminders cease:
-
-    email bookqueue@app10659070.mailgun.org with subject: DONE
-    *or*
-    text 917-746-3273 with DONE
-
-Get a list of all of your books:
-
-    email bookqueue@app10659070.mailgun.org with subject: LIST
-    *or*
-    text 917-746-3273 with LIST
-
-
 Setting up Your Own Instance of BookQueue
 -----------------------------------------
 
-To set up your own version on Heroku, you'll need to get the free Scheduler and Mailgun addons, and set up a daily task for bin/reminder.py.
+To set up your own version on Heroku, you'll need to register a phone number with Twilio and get Heroku's free Scheduler and Mailgun addons, and set up a daily task for bin/reminder.py.
 
 To set up the database on Heroku, follow these steps:
 
@@ -67,3 +29,41 @@ To set up the Heroku mailgun add-on, first add it, then create three routes in t
     4) filter: match_header("subject", "(?i)LIST"), action: forward("https://yourapp.herokuapp.com/list")
 
 
+
+
+Usage
+-----
+
+You may want to whitelist the email address you set up in order to avoid reminder emails getting stuck in your spam filter.
+
+
+Register your account with your phone number and email address:
+
+    text your Twilio phone number with EMAIL:you@yourdomain.com
+
+
+Add a book to your queue:
+
+    email your app with subject: BOOK, body: a single line of book info (ie 'Labyrinths by Jorge Luis Borges')
+    *or*
+    text your Twilio phone number with a single line of book info (ie 'On the Orator by Cicero')
+
+
+Set all books in your queue as a complete batch ready for reviews:
+
+    email your app with subject: EOB
+    *or*
+    text 917-746-3273 with EOB
+
+
+Mark your reviews for your current complete batch done to have that batch deleted and reminders cease:
+
+    email your app with subject: DONE
+    *or*
+    text your Twilio phone number with DONE
+
+Get a list of all of your books:
+
+    email your app with subject: LIST
+    *or*
+    text your Twilio phone number with LIST
