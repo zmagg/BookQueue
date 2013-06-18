@@ -53,7 +53,7 @@ Set all books in your queue as a complete batch ready for reviews:
 
     email your app with subject: EOB
     *or*
-    text 917-746-3273 with EOB
+    text your Twilio phone number with EOB
 
 
 Mark your reviews for your current complete batch done to have that batch deleted and reminders cease:
