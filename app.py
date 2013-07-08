@@ -33,8 +33,8 @@ def sms():
         mark_end_of_batch(user)
         message = "Batch marked complete and ready for reviews."
         if not user.email:
-            message += "Please register an email address to receive \
-            reminders, by texting email:you@yourdomain.com"
+            message += ("Please register an email address to receive"
+                "reminders, by texting email:you@yourdomain.com")
     elif text_content == 'done':
         mark_batch_reviews_done(user)
         message = "Reviews for this batch marked complete."
