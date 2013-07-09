@@ -8,27 +8,35 @@ Books are deleted when you mark their batch done, so you're best off only doing 
 Setting up Your Own Instance of BookQueue
 -----------------------------------------
 
-To set up your own version on Heroku, you'll need to register a phone number with Twilio and get Heroku's free Scheduler and Mailgun addons, and set up a daily task for bin/reminder.py.
+To set up your own version of BookQueue, you'll need to register a phone number with Twilio, setup a Heroku app, and get Heroku's free Scheduler and Mailgun addons, and set up a daily task for bin/reminder.py.
 
-To set up the database on Heroku, follow these steps:
+First, follow the Heroku setup instructions <a href="https://toolbelt.heroku.com/">here</a>.
 
-    in the command line:
+Clone this repository using
+    git clone git://github.com/DanielleSucher/BookQueue
+    
+Then, to set up the database on Heroku, follow these steps within the cloned directory:
+    
+in the command line:
       heroku addons:add heroku-postgresql:dev
-      heroku pg:promote HEROKU_POSTGRESQL_COLOR (where COLOR is whatever you got back from the prior command)
+            heroku pg:promote HEROKU_POSTGRESQL_COLOR (where COLOR is whatever you got back from the prior command)
       heroku run python
-    in the heroku python terminal:
-      from app import db
-      db.create_all()
+          in the heroku python terminal:
+                from app import db
+                      db.create_all()
 
+In order to use any addon with Heroku, you need to <a href="http://heroku.com/verify">verify</a> your account. Once you've done that you should be able to issue in the command line:
 
-To set up the Heroku mailgun add-on, first add it, then create three routes in the mailgun admin console:
+    heroku addons:add heroku-mailgun 
+    
+To get to the mailgun control panel, navigate to your Heroku apps dashboard in the website and click on "Mailgun" in the add-ons section. 
 
-    1) filter: match_header("subject", "(?i)EOB"), action: forward("https://yourapp.herokuapp.com/eob")
-    2) filter: match_header("subject", "(?i)DONE"), action: forward("https://yourapp.herokuapp.com/done")
-    3) filter: match_header("subject", "(?i)BOOK"), action: forward("https://yourapp.herokuapp.com/book")
-    4) filter: match_header("subject", "(?i)LIST"), action: forward("https://yourapp.herokuapp.com/list")
+You can then create four routes in the mailgun control panel, alternatively you can issue curl requests using the API key found in the Mailgun control panel.
 
-
+        1) filter: match_header("subject", "(?i)EOB"), action: forward("https://yourapp.herokuapp.com/eob")
+        2) filter: match_header("subject", "(?i)DONE"), action: forward("https://yourapp.herokuapp.com/done")
+        3) filter: match_header("subject", "(?i)BOOK"), action: forward("https://yourapp.herokuapp.com/book")
+        4) filter: match_header("subject", "(?i)LIST"), action: forward("https://yourapp.herokuapp.com/list")
 
 
 Usage
