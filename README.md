@@ -10,7 +10,7 @@ Setting up Your Own Instance of BookQueue
 
 To set up your own version of BookQueue, you'll need to register a phone number with Twilio, setup a Heroku app, and get Heroku's free Scheduler and Mailgun addons, and set up a daily task for bin/reminder.py.
 
-First, follow the Heroku setup instructions <a href="https://toolbelt.heroku.com/">here</a>.
+Install Heroku following the setup instructions <a href="https://toolbelt.heroku.com/">here</a>.
 
 Clone this repository using
     git clone git://github.com/DanielleSucher/BookQueue
