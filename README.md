@@ -19,11 +19,12 @@ Then, to set up the database on Heroku, follow these steps within the cloned dir
     
 in the command line:
       heroku addons:add heroku-postgresql:dev
-            heroku pg:promote HEROKU_POSTGRESQL_COLOR (where COLOR is whatever you got back from the prior command)
+      heroku pg:promote HEROKU_POSTGRESQL_COLOR (where COLOR is whatever you got back from the prior command)
       heroku run python
-          in the heroku python terminal:
-                from app import db
-                      db.create_all()
+
+      in the heroku python terminal:
+        from app import db
+        db.create_all()
 
 In order to use any addon with Heroku, you need to <a href="http://heroku.com/verify">verify</a> your account. Once you've done that you should be able to issue in the command line:
 
