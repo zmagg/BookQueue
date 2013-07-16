@@ -6,19 +6,18 @@ from flask.ext.mail import Mail, Message
 from random import randrange
 import re
 
-
 app = Flask(__name__)
-app.config.update(
-    SQLALCHEMY_DATABASE_URI=os.environ['DATABASE_URL'],
-    MAIL_SERVER=os.environ.get('MAILGUN_SMTP_SERVER', 'smtp.mailgun.org'),
-    MAIL_PORT=os.environ.get('MAILGUN_SMTP_PORT', 587),
-    MAIL_USERNAME=os.environ.get('MAILGUN_SMTP_LOGIN', None),
-    MAIL_PASSWORD=os.environ.get('MAILGUN_SMTP_PASSWORD', None),
-    DEFAULT_MAIL_SENDER="bookqueue@app10659070.mailgun.org"
-    )
 db = SQLAlchemy(app)
 mail = Mail(app)
 
+def init_app():
+    app.config.update(
+        SQLALCHEMY_DATABASE_URI=os.environ['DATABASE_URL'],
+        MAIL_SERVER=os.environ.get('MAILGUN_SMTP_SERVER', 'smtp.mailgun.org'),
+        MAIL_PORT=os.environ.get('MAILGUN_SMTP_PORT', 587),
+        MAIL_USERNAME=os.environ.get('MAILGUN_SMTP_LOGIN', None),
+        MAIL_PASSWORD=os.environ.get('MAILGUN_SMTP_PASSWORD', None),
+        DEFAULT_MAIL_SENDER="bookqueue@app10659070.mailgun.org")
 
 @app.route("/sms", methods=['GET', 'POST'])
 def sms():
@@ -215,4 +214,5 @@ class Book(db.Model):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 33507))
+    init_app()
     app.run(host='0.0.0.0', port=port)
