@@ -97,8 +97,8 @@ def list_categories(user):
 
 def list_books_for_category(user, cat):
     msg = ""
-    books = Book.query.filter(Book.user_id == user.id, Book.category == cat, Book.done == false)
-        .all()
+    books = Book.query.filter(
+        Book.user_id == user.id, Book.category == cat, Book.done == false).all()
     for book in books:
         msg += book + "\n"
     return msg
