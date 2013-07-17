@@ -6,19 +6,18 @@ from flask.ext.mail import Mail, Message
 from random import randrange
 import re
 
-
 app = Flask(__name__)
+
 app.config.update(
     SQLALCHEMY_DATABASE_URI=os.environ['DATABASE_URL'],
     MAIL_SERVER=os.environ.get('MAILGUN_SMTP_SERVER', 'smtp.mailgun.org'),
     MAIL_PORT=os.environ.get('MAILGUN_SMTP_PORT', 587),
     MAIL_USERNAME=os.environ.get('MAILGUN_SMTP_LOGIN', None),
     MAIL_PASSWORD=os.environ.get('MAILGUN_SMTP_PASSWORD', None),
-    DEFAULT_MAIL_SENDER="bookqueue@app10659070.mailgun.org"
-    )
+    DEFAULT_MAIL_SENDER="bookqueue@app10659070.mailgun.org")
+
 db = SQLAlchemy(app)
 mail = Mail(app)
-
 
 @app.route("/sms", methods=['GET', 'POST'])
 def sms():
@@ -29,67 +28,42 @@ def sms():
     if re.search("email:", text_content):
         update_user_email(user, text_content)
         message = "Your email has been saved."
-    elif text_content == 'eob':
-        mark_end_of_batch(user)
-        message = "Batch marked complete and ready for reviews."
-        if not user.email:
-            message += ("Please register an email address to receive"
-                "reminders, by texting email:you@yourdomain.com")
-    elif text_content == 'done':
-        mark_batch_reviews_done(user)
-        message = "Reviews for this batch marked complete."
-    elif text_content == 'list':
-        message = booklist_message(user)
+    elif text_content.startswith('list'):
+        if text_content == 'list':
+            message = list_categories(user)
+        else:
+            list_cat = text_content.strip('list').strip()
+            message = list_books_for_category(user, list_cat)
+    elif text_content.startswith('del'):
+        book = text_content.strip('del').strip()
+        mark_book_as_read(user, book)
+        message = "deleted" + book
     else:
-        add_new_book(user, request.form['Body'])
+        book_and_cat = request.form['Body'].partition['***']
+        add_new_boot(user, book_and_cat[0], book_and_cat[2].strip())
         message = "Your book has been added."
 
     resp = twilio.twiml.Response()
     resp.sms(message)
     return str(resp)
 
-
 # email routes
 
-
+# Category should be on second line if email.
 @app.route("/book", methods=['GET', 'POST'])
 def book():
     user = find_user_from_email_headers(request)
     if user:
-        add_new_book(user, request.form['body-plain'].split('\n', 1)[0])
+        book_cat = request.form['body-plain'].split('\n')
+        if book_cat.length > 1:
+            add_new_book(user, book_cat[0], book_cat[1])
+        else:
+            add_new_book(user, book_cat[0], "NOCAT")
         if user.email:
             message = Message("Your book has been added.",
                                 recipients=[user.email])
             mail.send(message)
     return 'ok'
-
-
-@app.route("/eob", methods=['GET', 'POST'])
-def eob():
-    user = find_user_from_email_headers(request)
-    if user:
-        mark_end_of_batch(user)
-        if user.email:
-            message_text = "Batch marked complete and ready for reviews. \
-                (You can text DONE to 917-746-3273 or email \
-                bookqueue@app10659070.mailgun.org with subject line \
-                DONE to stop receiving these reminder emails.)"
-            message = Message(message_text, recipients=[user.email])
-            mail.send(message)
-    return 'ok'
-
-
-@app.route("/done", methods=['GET', 'POST'])
-def done():
-    user = find_user_from_email_headers(request)
-    if user:
-        mark_batch_reviews_done(user)
-        if user.email:
-            message = Message("Reviews for this batch marked complete.",
-                                recipients=[user.email])
-            mail.send(message)
-    return 'ok'
-
 
 @app.route("/list", methods=['GET', 'POST'])
 def list():
@@ -101,34 +75,45 @@ def list():
         mail.send(message)
     return 'ok'
 
-
 # shared functions for routes
 
-
-def add_new_book(user, book_info):
-    book = Book(user.id, book_info)
+def add_new_book(user, book_info, cat):
+    if cat:
+        book = Book(user.id, book_info, cat)
+    else:
+        book = Book(user.id, book_info, "NOCAT")
     db.session.add(book)
-    if ready_for_new_batch_to_review(user):
-        mark_end_of_batch(user)
     db.session.commit()
 
-
-def booklist_message(user):
-    batch_books = Book.query.filter(Book.user_id == user.id,
-                                            Book.review_needed == True).all()
-    non_batch_books = Book.query.filter(Book.user_id == user.id,
-                                            Book.review_needed == None).all()
-    msg = ""
-    if len(batch_books) > 0:
-        msg += "Books in your latest complete batch waiting for reviews: \n"
-        for book in batch_books:
-            msg += book.info + " \n"
-        msg += "\n"
-    msg += "Books not yet batched/waiting for reviews: \n"
-    for book in non_batch_books:
-        msg += book.info + " \n"
+def list_categories(user):
+    cats = Set()
+    msg = "Categories: "
+    books = Book.query.filter(Book.user_id == user.id, Book.done == false).all()
+    for book in books:
+        cats.add(book.category)
+    for cat in cats:
+        msg += cat + "\n"
     return msg
 
+def list_books_for_category(user, cat):
+    msg = ""
+    books = Book.query.filter(
+        Book.user_id == user.id, Book.category == cat, Book.done == false).all()
+    for book in books:
+        msg += book + "\n"
+    return msg
+
+def booklist_message(user):
+    msg = ""
+    books = Book.query.filter(Book.user_id == user.id, Book.done == false).all()
+    for book in books:
+        msg += book.info + "\n"
+    return msg
+
+def mark_book_as_read(user, book):
+    book = Book.query.filter(Book.user_id == user.id, Book.info == book)
+    book.done = True
+    db.session.commit()
 
 def find_or_create_user(from_number):
     query = User.query.filter(User.phonenumber == from_number)
@@ -149,47 +134,16 @@ def find_user_from_email_headers(request):
     else:
         return None
 
-
-def mark_batch_reviews_done(user):
-    books = Book.query.filter(Book.user_id == user.id,
-                                Book.review_needed == True).all()
-    for book in books:
-        db.session.delete(book)
-    user.reviews_needed = None
-    db.session.commit()
-
-
-def mark_end_of_batch(user):
-    books = Book.query.filter(Book.user_id == user.id).all()
-    for book in books:
-        book.review_needed = True
-    user.reviews_needed = True
-    db.session.commit()
-
-
-def ready_for_new_batch_to_review(user):
-    db.session.commit()
-    if user.reviews_needed:
-        return False
-    else:
-        book_count = int(Book.query.filter(Book.user_id == user.id).count())
-        minimum_books_needed_for_eob = 6 + randrange(7)
-        return book_count >= minimum_books_needed_for_eob
-
-
 def update_user_email(user, text_content):
     user.email = re.search("(?<=email:).+", text_content).group(0)
     db.session.commit()
 
-
 # models
-
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     phonenumber = db.Column(db.String(20), unique=True)
     email = db.Column(db.String(120), unique=True, nullable=True)
-    reviews_needed = db.Column(db.Boolean, nullable=True)
 
     def __init__(self, phonenumber, email):
         self.phonenumber = phonenumber
@@ -203,11 +157,13 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     info = db.Column(db.String(240))
-    review_needed = db.Column(db.Boolean, nullable=True)
+    category = db.Column(db.String(120))
+    done = db.Column(db.Boolean)
 
-    def __init__(self, user_id, info):
+    def __init__(self, user_id, info, category):
         self.user_id = user_id
         self.info = info
+        self.category = category
 
     def __repr__(self):
         return '<info %r>' % self.info
